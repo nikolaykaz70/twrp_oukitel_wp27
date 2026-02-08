@@ -1,4 +1,4 @@
-name: Recovery Build
+name: TWRP Build WP27
 
 on:
   workflow_dispatch:
@@ -10,37 +10,28 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Cleanup
-        run: |
-          sudo apt-get purge azure-cli ghc* zulu* llvm* firefox google* dotnet* powershell mysql* php* android*
-          sudo apt-get autoremove && sudo apt-get autoclean
-
-      - name: Install Tools
+      - name: Подготовка сервера
         run: |
           sudo apt-get update
-          sudo apt-get install -y bc build-essential zip curl libc6-dev libncurses5-dev libssl-dev python3 python-is-python3 repo
+          sudo apt-get install -y bc build-essential zip curl repo python3
 
-      - name: Sync TWRP
+      - name: Скачивание исходников (30ГБ)
         run: |
           mkdir ~/twrp && cd ~/twrp
           repo init --depth=1 -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git -b twrp-12.1
           repo sync -j$(nproc)
 
-      - name: Setup Device
+      - name: Сборка образа
         run: |
           mkdir -p ~/twrp/device/oukitel/WP27
           cp -r $GITHUB_WORKSPACE/* ~/twrp/device/oukitel/WP27/
-
-      - name: Build
-        run: |
           cd ~/twrp
           source build/envsetup.sh
-          export ALLOW_MISSING_DEPENDENCIES=true
           lunch twrp_WP27-eng
           make vendorbootimage -j$(nproc)
 
-      - name: Upload
+      - name: Сохранение файла
         uses: actions/upload-artifact@v4
         with:
-          name: TWRP-WP27
+          name: TWRP_WP27_Image
           path: ~/twrp/out/target/product/WP27/vendor_boot.img
