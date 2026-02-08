@@ -1,6 +1,12 @@
 name: Recovery Build
 
 on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+  : Recovery Build
+
+on:
   workflow_dispatch:
 
 jobs:
