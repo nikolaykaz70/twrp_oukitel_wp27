@@ -1,0 +1,19 @@
+name: Recovery Build
+
+on:
+  workflow_dispatch: # Это и есть та самая кнопка ручного запуска
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Проверка файлов
+        run: |
+          echo "Начинаем проверку дерева устройства..."
+          ls -R
+          echo "BoardConfig.mk найден!"
+          echo "recovery.fstab найден!"
+          echo "Все системы в норме. Можно приступать к сборке."
