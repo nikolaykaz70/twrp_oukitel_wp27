@@ -1,4 +1,4 @@
-name: TWRP Build WP27 OrangeFox-Style
+name: TWRP Build WP27 Stable
 
 on:
   push:
@@ -22,11 +22,11 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y bc build-essential zip curl libssl-dev python3 python-is-python3 repo
 
-      - name: Sync OrangeFox Minimal
+      - name: Sync TWRP 11 (Stable)
         run: |
           mkdir ~/twrp && cd ~/twrp
-          # Используем более легкий манифест OrangeFox для Android 12.1
-          repo init --depth=1 -u https://gitlab.com/OrangeFox/Manifest.git -b fox_12.1
+          # TWRP 11 гораздо стабильнее в плане потребления RAM
+          repo init --depth=1 -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git -b twrp-11
           repo sync -c -j$(nproc) --no-tags --no-clone-bundle --force-sync
 
       - name: Setup Device
@@ -39,9 +39,15 @@ jobs:
           cd ~/twrp
           export ALLOW_MISSING_DEPENDENCIES=true
           export LC_ALL=C
-          export FOX_VIRTUAL_AB=1
-          export SKIP_BOOTSTRAP_CHECKS=true
           export SOONG_SKIP_TESTS=true
+          export BUILD_BROKEN_PYTHON_IS_PYTHON2=true
+          export BUILD_BROKEN_DUP_RULES=true
           source build/envsetup.sh
           lunch twrp_WP27-eng
           mka vendorbootimage
+
+      - name: Upload Result
+        uses: actions/upload-artifact@v4
+        with:
+          name: TWRP-WP27-Ready
+          path: ~/twrp/out/target/product/WP27/vendor_boot.img
