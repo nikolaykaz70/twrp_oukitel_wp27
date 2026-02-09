@@ -1,4 +1,4 @@
-name: TWRP Build WP27 Full Fix
+name: TWRP Build WP27 DTB Fix
 
 on:
   push:
@@ -40,17 +40,17 @@ jobs:
           export LC_ALL=C
           export SOONG_SKIP_TESTS=true
           export BUILD_BROKEN_PYTHON_IS_PYTHON2=true
-          export BUILD_BROKEN_DUP_RULES=true
           
           source build/envsetup.sh
           lunch twrp_WP27-eng
           
-          # Сборка с принудительным указанием всех параметров, которых не хватает в дереве устройства
+          # Мы добавили BOARD_PREBUILT_DTBIMAGE_PATH, чтобы исправить ошибку "DTB must not be empty"
           mka vendorbootimage \
             TW_THEME=portrait_hdpi \
             TARGET_SCREEN_WIDTH=1080 \
             TARGET_SCREEN_HEIGHT=2460 \
-            BOARD_KERNEL_IMAGE_NAME=Image.gz
+            BOARD_KERNEL_IMAGE_NAME=Image.gz \
+            BOARD_PREBUILT_DTBIMAGE_PATH=device/oukitel/WP27/dtb
 
       - name: Upload Result
         uses: actions/upload-artifact@v4
