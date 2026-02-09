@@ -1,4 +1,4 @@
-name: TWRP Build WP27 Safe
+name: TWRP WP27 Final Ultimate
 
 on:
   push:
@@ -12,24 +12,26 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Cleanup and Install
+      - name: Free Disk Space
         run: |
-          # Освобождаем место и ставим инструменты за один раз
-          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc
-          sudo apt-get update
-          sudo apt-get install -y bc build-essential zip curl libssl-dev python3 python-is-python3 repo
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/share/boost /usr/local/lib/node_modules
           sudo apt-get clean
+
+      - name: Install Build Tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bc build-essential zip curl libssl-dev python3 repo
+          sudo ln -sf /usr/bin/python3 /usr/bin/python
 
       - name: Sync TWRP
         run: |
           mkdir ~/twrp && cd ~/twrp
           repo init --depth=1 -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git -b twrp-11
-          # j1 - медленная, но самая стабильная загрузка без ошибок сети
-          repo sync -c -j1 --no-tags --no-clone-bundle --force-sync
+          # Увеличиваем количество потоков до 4 для баланса скорости и стабильности
+          repo sync -c -j4 --no-tags --no-clone-bundle --force-sync
 
       - name: Setup Device
         run: |
-          # Копируем твои файлы из репозитория в папку сборки
           mkdir -p ~/twrp/device/oukitel/WP27
           cp -r $GITHUB_WORKSPACE/* ~/twrp/device/oukitel/WP27/
 
@@ -39,12 +41,10 @@ jobs:
           export ALLOW_MISSING_DEPENDENCIES=true
           export LC_ALL=C
           export SOONG_SKIP_TESTS=true
-          export BUILD_BROKEN_PYTHON_IS_PYTHON2=true
           
           source build/envsetup.sh
           lunch twrp_WP27-eng
           
-          # Запуск сборки с жестко прописанными параметрами
           mka vendorbootimage \
             TW_THEME=portrait_hdpi \
             TARGET_SCREEN_WIDTH=1080 \
@@ -55,5 +55,5 @@ jobs:
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
-          name: TWRP-WP27-Ready
+          name: TWRP-WP27-Image
           path: ~/twrp/out/target/product/WP27/vendor_boot.img
