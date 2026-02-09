@@ -22,10 +22,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y bc build-essential zip curl libssl-dev python3 python-is-python3 repo
 
-      - name: Sync TWRP
+      -       - name: Sync TWRP
         run: |
           mkdir ~/twrp && cd ~/twrp
-          repo init --depth=1 -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_omni.git -b twrp-12.1
+          repo init --depth=1 -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git -b twrp-12.1
           repo sync -c -j$(nproc) --no-tags --no-clone-bundle --force-sync
 
       - name: Setup Device
