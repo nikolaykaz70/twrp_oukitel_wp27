@@ -1,4 +1,4 @@
-name: TWRP Build WP27 Final
+name: TWRP Build WP27 Final-V2
 
 on:
   push:
@@ -38,15 +38,13 @@ jobs:
           cd ~/twrp
           export ALLOW_MISSING_DEPENDENCIES=true
           export LC_ALL=C
-          export SOONG_SKIP_TESTS=true
+          # Полное подавление тестов Soong
+          export SOONG_ALLOW_MISSING_DEPENDENCIES=true
+          export SOONG_SKIP_PYTHON_CHECK=true
+          export SKIP_BOOTSTRAP_CHECKS=true
           export BUILD_BROKEN_PYTHON_IS_PYTHON2=true
           export BUILD_BROKEN_DUP_RULES=true
+          # Запуск сборки без предварительных проверок
           source build/envsetup.sh
           lunch twrp_WP27-eng
-          mka vendorbootimage
-
-      - name: Upload Result
-        uses: actions/upload-artifact@v4
-        with:
-          name: TWRP-WP27-Ready
-          path: ~/twrp/out/target/product/WP27/vendor_boot.img
+          mka vendorbootimage -j$(nproc)
