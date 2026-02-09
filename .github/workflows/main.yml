@@ -1,4 +1,4 @@
-name: TWRP Build WP27
+name: TWRP Build WP27 Final
 
 on:
   push:
@@ -39,7 +39,8 @@ jobs:
           export ALLOW_MISSING_DEPENDENCIES=true
           export LC_ALL=C
           export SOONG_SKIP_TESTS=true
-          export TEMPORARY_DISABLE_PATH_RESTRICTIONS=true
+          export BUILD_BROKEN_PYTHON_IS_PYTHON2=true
+          export BUILD_BROKEN_DUP_RULES=true
           source build/envsetup.sh
           lunch twrp_WP27-eng
           mka vendorbootimage
