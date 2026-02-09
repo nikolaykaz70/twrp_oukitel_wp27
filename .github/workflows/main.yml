@@ -1,4 +1,4 @@
-name: TWRP Build WP27 Final-V2
+name: TWRP Build WP27 OrangeFox-Style
 
 on:
   push:
@@ -22,10 +22,11 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y bc build-essential zip curl libssl-dev python3 python-is-python3 repo
 
-      - name: Sync TWRP
+      - name: Sync OrangeFox Minimal
         run: |
           mkdir ~/twrp && cd ~/twrp
-          repo init --depth=1 -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git -b twrp-12.1
+          # Используем более легкий манифест OrangeFox для Android 12.1
+          repo init --depth=1 -u https://gitlab.com/OrangeFox/Manifest.git -b fox_12.1
           repo sync -c -j$(nproc) --no-tags --no-clone-bundle --force-sync
 
       - name: Setup Device
@@ -38,13 +39,9 @@ jobs:
           cd ~/twrp
           export ALLOW_MISSING_DEPENDENCIES=true
           export LC_ALL=C
-          # Полное подавление тестов Soong
-          export SOONG_ALLOW_MISSING_DEPENDENCIES=true
-          export SOONG_SKIP_PYTHON_CHECK=true
+          export FOX_VIRTUAL_AB=1
           export SKIP_BOOTSTRAP_CHECKS=true
-          export BUILD_BROKEN_PYTHON_IS_PYTHON2=true
-          export BUILD_BROKEN_DUP_RULES=true
-          # Запуск сборки без предварительных проверок
+          export SOONG_SKIP_TESTS=true
           source build/envsetup.sh
           lunch twrp_WP27-eng
-          mka vendorbootimage -j$(nproc)
+          mka vendorbootimage
